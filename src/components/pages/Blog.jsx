@@ -26,7 +26,7 @@ function Blog() {
     <div className="bg-white">
       <div className="w-full ">
         <div className="max-w-[1320px] mx-auto">
-          <div className="flex justify-between items-center my-12 px-2">
+          <div className="sm:flex space-y-2 sm:justify-between items-center my-4 sm:my-12 px-10 sm:px-4">
             <CardSearchBar fun1={setSearch} />
             <CardSelectMenu f2={setSelect} />
           </div>
