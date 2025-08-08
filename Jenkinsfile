@@ -1,14 +1,20 @@
 pipeline {
     agent any
+
+    environment {
+        ENVIRON = 'portfolio'
+    }
+
     stages {
         stage('Detect Branch and Set Environment') {
             steps {
                 script {
                     def branchName = env.BRANCH_NAME
-                    env.ENVIRON = 'portfolio'
+                    echo "Branch detected: ${branchName}"
                 }
             }
         }
+
         stage('Checkout Configuration Repository') {
             steps {
                 script {
@@ -20,38 +26,42 @@ pipeline {
                         submoduleCfg: [],
                         userRemoteConfigs: [[credentialsId: 'git-pat', url: 'https://github.com/Saliram01/Jenkins-Config.git']]
                     ])
-
                 }
             }
         }
-        stage('move Script'){
+
+        stage('Move Script') {
             steps {
                 sh "mv Template/docker-hub.sh ."
                 sh "mv Template/env_dev.sh ."
             }
         }
-        
-        script {
-            withCredentials([usernamePassword(credentialsId: 'docker-hub-pat', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
+
+        stage('Docker Login') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-pat', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
                 }
             }
+        }
 
         stage('Execute Script') {
             steps {
                 sh "chmod +x docker-hub.sh"
                 sh "./docker-hub.sh ${env.ENVIRON}"
             }
-        }    
-}
-   post {
+        }
+    }
+
+    post {
+        always {
+            sh 'docker logout || true'
+        }
         success {
-            script {
-                echo "Image pushed successfully!"
-            }
+            echo "Image pushed successfully!"
         }
         failure {
-            echo "Pipeline failed. Docker image will not be pushed."
+            echo "Pipeline failed. Docker image was not pushed."
         }
     }
 }
