@@ -40,7 +40,9 @@ pipeline {
         stage('Docker Login') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-pat', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
+                    sh """
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                    """
                 }
             }
         }
@@ -54,10 +56,12 @@ pipeline {
     }
 
     post {
+        always {
+            sh 'docker logout || true'
+        }
         success {
             echo "Image pushed successfully!"
         }
-        
         failure {
             echo "Pipeline failed. Docker image was not pushed."
         }
