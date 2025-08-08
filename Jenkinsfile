@@ -18,7 +18,7 @@ pipeline {
                         doGenerateSubmoduleConfigurations: false,
                         extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'Template']],
                         submoduleCfg: [],
-                        userRemoteConfigs: [[credentialsId: 'git-pat', url: '']]
+                        userRemoteConfigs: [[credentialsId: 'git-pat', url: 'https://github.com/Saliram01/Jenkins-Config.git']]
                     ])
 
                 }
@@ -26,27 +26,20 @@ pipeline {
         }
         stage('move Script'){
             steps {
-                sh "mv Template/_____.sh ."
-                sh "mv Template/env_master.sh ."
+                sh "mv Template/docker-hub.sh ."
+                sh "mv Template/env_dev.sh ."
             }
         }
         stage('Execute Script') {
             steps {
-                // Run script.sh
-                sh "chmod +x ____.sh"
-                sh "./____.sh ${env.ENVIRON}"
+                sh "chmod +x docker-hub.sh"
+                sh "./docker-hub.sh ${env.ENVIRON}"
             }
         }    
 }
    post {
         success {
             script {
-                echo "Pushing image to Docker Hub..."
-
-                docker.withRegistry('https://index.docker.io/v1/', "${DOCKERHUB_CREDENTIALS}") {
-                    docker.image("${IMAGE_NAME}:${IMAGE_TAG}").push()
-                }
-
                 echo "Image pushed successfully!"
             }
         }
