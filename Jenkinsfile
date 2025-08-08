@@ -30,6 +30,13 @@ pipeline {
                 sh "mv Template/env_dev.sh ."
             }
         }
+        
+        script {
+            withCredentials([usernamePassword(credentialsId: 'docker-hub-pat', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
+                }
+            }
+
         stage('Execute Script') {
             steps {
                 sh "chmod +x docker-hub.sh"
