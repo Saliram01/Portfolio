@@ -25,4 +25,4 @@ COPY --from=builder /build/dist ./dist
 
 EXPOSE 4173
 
-CMD ["npm","run","start"]
+CMD ["npm","run","preview"]
